@@ -6,11 +6,6 @@ updates:
       interval: daily
       time: '00:30'
       timezone: Europe/Berlin
-    cooldown:
-      default-days: 7
-      semver-patch-days: 7
-      include:
-        - '*'
 
   - package-ecosystem: composer
     directory: /
