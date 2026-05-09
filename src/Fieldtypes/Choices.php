@@ -162,15 +162,18 @@ class Choices extends Fieldtype
                         ],
                         'validate' => ['required', 'in:single,multiple'],
                     ],
-                    'layout' => [
-                        'display' => __('Layout'),
-                        'type' => 'select',
-                        'default' => 'one_column',
+                    'card_width' => [
+                        'display' => __('Card Width'),
+                        'instructions' => __('Controls how much horizontal space each choice card uses. Cards wrap automatically.'),
+                        'type' => 'button_group',
+                        'default' => 100,
                         'options' => [
-                            'one_column' => __('One column'),
-                            'two_columns' => __('Two columns'),
+                            100 => '100%',
+                            50 => '50%',
+                            33 => '33%',
+                            25 => '25%',
                         ],
-                        'validate' => ['required', 'in:one_column,two_columns'],
+                        'validate' => ['required', 'in:100,50,33,25'],
                     ],
                     'default' => [
                         'display' => __('Default Value'),

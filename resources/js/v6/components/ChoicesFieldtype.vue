@@ -2,7 +2,7 @@
   <div class="choices-fieldtype">
     <div
       class="choices-grid"
-      :class="layoutClass"
+      :class="cardWidthClass"
       :role="isMultiple ? 'group' : 'radiogroup'"
       :aria-label="config.display || handle"
     >
@@ -129,10 +129,12 @@ export default {
       return this.value === null || this.value === undefined || this.value === '' ? [] : [String(this.value)]
     },
 
-    layoutClass(): string {
-      return (this.config as { layout?: string }).layout === 'two_columns'
-        ? 'choices-grid--two-columns'
-        : 'choices-grid--one-column'
+    cardWidthClass(): string {
+      const cardWidth = String((this.config as { card_width?: string | number }).card_width ?? 100)
+
+      return ['100', '50', '33', '25'].includes(cardWidth)
+        ? `choices-grid--card-width-${cardWidth}`
+        : 'choices-grid--card-width-100'
     },
 
     isReadOnly(): boolean {
@@ -235,17 +237,24 @@ export default {
   gap: 12px;
 }
 
-.choices-grid--one-column {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.choices-grid--two-columns {
+.choices-grid--card-width-100,
+.choices-grid--card-width-50,
+.choices-grid--card-width-33,
+.choices-grid--card-width-25 {
   grid-template-columns: minmax(0, 1fr);
 }
 
 @media (min-width: 760px) {
-  .choices-grid--two-columns {
+  .choices-grid--card-width-50 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .choices-grid--card-width-33 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .choices-grid--card-width-25 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
