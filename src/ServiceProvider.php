@@ -6,6 +6,7 @@ namespace ElSchneider\Choices;
 
 use Inertia\Inertia;
 use Statamic\Providers\AddonServiceProvider;
+use Statamic\Statamic;
 
 final class ServiceProvider extends AddonServiceProvider
 {
@@ -28,6 +29,22 @@ final class ServiceProvider extends AddonServiceProvider
             'input' => $input,
             'publicDirectory' => 'resources/dist',
         ]);
+
+        return $this;
+    }
+
+    protected function bootPublishAfterInstall()
+    {
+        if (! $this->publishAfterInstall) {
+            return $this;
+        }
+
+        Statamic::afterInstalled(function ($command) {
+            $command->call('vendor:publish', [
+                '--tag' => $this->getAddon()->slug(),
+                '--force' => true,
+            ]);
+        });
 
         return $this;
     }
