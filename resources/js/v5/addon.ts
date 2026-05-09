@@ -227,7 +227,7 @@ const ChoicesFieldtype = {
     },
   },
 
-  template: /* html */ `
+  template: /* vue */ `
         <div class="choices-fieldtype choices-fieldtype--v5">
             <div
                 class="choices-grid"
