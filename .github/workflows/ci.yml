@@ -51,11 +51,17 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
-      - name: Check PHP style
-        run: ./vendor/bin/pint --test
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Test frontend
+        run: npm run test:js
 
       - name: Build assets
         run: npm run build
+
+      - name: Check PHP style
+        run: ./vendor/bin/pint --test
 
       - name: Run tests
         run: ./vendor/bin/pest --ci
