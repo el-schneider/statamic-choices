@@ -2,19 +2,16 @@
 
 # Statamic Choices
 
-> Card-style radio and checkbox fields for Statamic v5 and v6.
+> Help editors make better decisions. Turn radios and checkboxes into visual choice cards.
 
-Statamic Choices adds a `choices` fieldtype for presenting selectable options as cards. Use it for plans, feature bundles, visual presets, product options, onboarding choices, or any field where a plain radio group or checkbox list is too thin.
+A plain radio group asks editors to pick a word. **Choices** lets you show what they're actually picking — an image, a description, or trusted custom HTML when words won't cut it.
 
 ## Features
 
-- **Single or multiple selection**: Store values like radios (`single`) or checkboxes (`multiple`)
-- **Rich choice cards**: Add labels, asset images, descriptions, or trusted custom HTML per option
-- **Content and image variants**: Use text/content cards or full-bleed image cards
-- **Flexible card widths**: Choose 100%, 50%, 33%, 25%, or 20% card widths
-- **Native Statamic styling**: Version-specific control panel UI for Statamic v5 and v6, including dark mode
-- **Frontend-friendly augmentation**: Selected choices augment to full option objects, including resolved assets
-- **Statamic v5 + v6**: One addon package with version-specific Vue implementations
+- **Single or multiple**: Behaves like radios or checkboxes
+- **Rich cards**: Label, image, description, or some fine custom HTML per option
+- **Two variants**: Content cards for text-led choices, image cards when the picture _is_ the choice
+- **Frontend-ready**: Augments to full option objects with resolved assets
 
 ## Requirements
 
@@ -115,22 +112,9 @@ addons:
 | `use_html`    | Enables trusted custom HTML for content cards. When enabled, HTML replaces image and description. |
 | `html`        | Trusted HTML rendered inside the card. No Antlers rendering.                                      |
 
-## Content Cards
+## Custom HTML
 
-Content cards show the selection control, optional image, label, and either a description or custom HTML.
-
-```yaml
-variant: content
-options:
-  - value: pro
-    label: Pro
-    image: assets::cards/pro.svg
-    description: More automation and editorial flexibility.
-```
-
-### Custom HTML
-
-Custom HTML is intended for trusted blueprint configuration, not editor-entered content.
+Content cards can swap their image and description for trusted custom HTML. Intended for blueprint configuration — not editor input. No Antlers.
 
 ```yaml
 options:
@@ -141,7 +125,7 @@ options:
       code: '<span class="badge-sm">Popular</span>'
 ```
 
-When `use_html` is enabled on a content card, `image` and `description` are ignored for that option. Labels and selection controls remain controlled by the fieldtype.
+Labels and selection controls stay under fieldtype control.
 
 ## Image Cards
 
@@ -208,10 +192,8 @@ Multiple selections are returned in the option order from the blueprint.
 
 ## Notes
 
-- Unknown saved values are ignored during processing and augmentation.
-- Unprefixed image paths are resolved against the only configured asset container when exactly one exists. Prefer explicit asset IDs like `assets::path/to/image.svg`.
-- Custom HTML is rendered raw in the control panel. Only use trusted markup in blueprint configuration.
-- Custom HTML does not render Antlers.
+- Unknown saved values are ignored.
+- Unprefixed image paths only resolve when exactly one asset container is configured. Prefer explicit IDs like `assets::path/to/image.svg`.
 
 ## Development
 
