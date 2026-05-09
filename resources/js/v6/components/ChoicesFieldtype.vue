@@ -313,6 +313,10 @@ export default {
   container-type: inline-size;
 }
 
+.choices-card-shell:focus-visible {
+  outline: none;
+}
+
 .choices-card {
   transition:
     box-shadow 120ms ease,
