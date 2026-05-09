@@ -1,14 +1,20 @@
 <template>
   <div class="choices-fieldtype">
-    <div class="choices-grid" :class="layoutClass" role="group" :aria-label="config.display || handle">
+    <div
+      class="choices-grid"
+      :class="layoutClass"
+      :role="isMultiple ? 'group' : 'radiogroup'"
+      :aria-label="config.display || handle"
+    >
       <label
         v-for="option in options"
         :key="option.value"
-        class="choices-card"
+        class="choices-card-shell"
         :class="{
-          'choices-card--selected': isSelected(option.value),
-          'choices-card--disabled': isReadOnly || config.disabled,
+          'choices-card-shell--selected': isSelected(option.value),
+          'choices-card-shell--disabled': isReadOnly || isDisabled,
         }"
+        @click="handleCardClick(option.value, $event)"
       >
         <input
           class="choices-card__input"
@@ -16,32 +22,56 @@
           :name="inputName"
           :value="option.value"
           :checked="isSelected(option.value)"
-          :disabled="isReadOnly || config.disabled"
-          @change="toggle(option.value)"
+          :disabled="isReadOnly || isDisabled"
+          @change="handleInput(option.value, $event)"
         />
 
-        <span class="choices-card__indicator" aria-hidden="true">
-          <span class="choices-card__indicator-dot"></span>
-        </span>
+        <Card inset variant="flat" class="choices-card">
+          <span class="choices-card__control" aria-hidden="true">
+            <span v-if="isMultiple" class="choices-card__checkbox">
+              <svg
+                v-if="isSelected(option.value)"
+                viewBox="0 0 10 8"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="choices-card__checkmark"
+                aria-hidden="true"
+              >
+                <path
+                  d="M9 1L3.5 6.5L1 4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span v-else class="choices-card__radio">
+              <span v-if="isSelected(option.value)" class="choices-card__radio-dot"></span>
+            </span>
+          </span>
 
-        <img
-          v-if="option.image_url"
-          class="choices-card__image"
-          :src="option.image_url"
-          :alt="option.image_alt || option.label"
-        />
+          <img
+            v-if="option.image_url"
+            class="choices-card__image"
+            :src="option.image_url"
+            :alt="option.image_alt || option.label"
+          />
 
-        <span class="choices-card__body">
-          <span class="choices-card__label">{{ option.label }}</span>
-          <span v-if="option.description" class="choices-card__description">{{ option.description }}</span>
-          <span v-if="option.html" class="choices-card__html" v-html="option.html"></span>
-        </span>
+          <span class="choices-card__body">
+            <span class="choices-card__label">{{ option.label }}</span>
+            <span v-if="option.description" class="choices-card__description">{{ option.description }}</span>
+            <span v-if="option.html" class="choices-card__html" v-html="option.html"></span>
+          </span>
+        </Card>
       </label>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { Card } from '@statamic/cms/ui'
+
 type ChoiceOption = {
   value: string
   label: string
@@ -54,6 +84,10 @@ type ChoiceOption = {
 
 export default {
   name: 'ChoicesFieldtype',
+
+  components: {
+    Card,
+  },
 
   emits: ['update:value', 'replicator-preview-updated'],
 
@@ -106,6 +140,10 @@ export default {
       return this.readOnly || config.visibility === 'read_only' || config.visibility === 'computed'
     },
 
+    isDisabled(): boolean {
+      return Boolean((this.config as { disabled?: boolean }).disabled)
+    },
+
     replicatorPreview(): string | undefined {
       if (!this.showFieldPreviews) return undefined
 
@@ -131,23 +169,48 @@ export default {
       return this.selectedValues.includes(value)
     },
 
-    toggle(value: string): void {
-      if (this.isReadOnly || (this.config as { disabled?: boolean }).disabled) return
+    handleInput(value: string, event: Event): void {
+      if (this.isReadOnly || this.isDisabled) return
 
       if (!this.isMultiple) {
         this.$emit('update:value', value)
         return
       }
 
-      const selected = new Set(this.selectedValues)
+      this.setMultipleSelection(value, (event.target as HTMLInputElement).checked)
+    },
 
-      if (selected.has(value)) {
-        selected.delete(value)
-      } else {
-        selected.add(value)
+    handleCardClick(value: string, event: MouseEvent): void {
+      if (this.isReadOnly || this.isDisabled) return
+
+      const target = event.target as HTMLElement
+
+      if (target.closest('a[href], button, input, select, textarea, [role="button"]')) {
+        return
       }
 
-      this.$emit('update:value', this.sortValues([...selected]))
+      event.preventDefault()
+
+      if (!this.isMultiple) {
+        this.$emit('update:value', value)
+        return
+      }
+
+      this.setMultipleSelection(value, !this.isSelected(value))
+    },
+
+    setMultipleSelection(value: string, selected: boolean): void {
+      if (this.isReadOnly || this.isDisabled) return
+
+      const values = new Set(this.selectedValues)
+
+      if (selected) {
+        values.add(value)
+      } else {
+        values.delete(value)
+      }
+
+      this.$emit('update:value', this.sortValues([...values]))
     },
 
     sortValues(values: string[]): string[] {
@@ -185,83 +248,126 @@ export default {
   }
 }
 
-.choices-card {
+.choices-card-shell {
   position: relative;
-  display: flex;
+  display: block;
   min-width: 0;
   cursor: pointer;
-  gap: 12px;
-  overflow: hidden;
-  border: 1px solid var(--ui-border, rgb(203 213 225));
-  border-radius: 8px;
-  background: var(--ui-bg, white);
-  padding: 14px;
-  transition:
-    border-color 120ms ease,
-    box-shadow 120ms ease,
-    background-color 120ms ease;
 }
 
-.choices-card:hover {
-  border-color: var(--ui-border-hover, rgb(148 163 184));
-}
-
-.choices-card:focus-within {
-  outline: 2px solid var(--ui-focus, rgb(37 99 235));
-  outline-offset: 2px;
-}
-
-.choices-card--selected {
-  border-color: var(--ui-accent, rgb(37 99 235));
-  box-shadow: inset 0 0 0 1px var(--ui-accent, rgb(37 99 235));
-}
-
-.choices-card--disabled {
+.choices-card-shell--disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
+.choices-card {
+  display: flex;
+  min-width: 0;
+  gap: 12px;
+  padding: 14px;
+  transition:
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.choices-card-shell:hover:not(.choices-card-shell--disabled) .choices-card {
+  transform: translateY(-1px);
+}
+
+.choices-card-shell:has(:focus-visible) .choices-card {
+  outline: 2px solid var(--theme-color-ui-accent-bg);
+  outline-offset: 2px;
+}
+
+.choices-card-shell--selected .choices-card {
+  box-shadow:
+    0 0 0 2px var(--theme-color-ui-accent-bg),
+    var(--shadow-ui-md);
+}
+
 .choices-card__input {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  clip-path: inset(50%);
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  cursor: inherit;
+  opacity: 0;
+  outline: none;
+  pointer-events: none;
 }
 
-.choices-card__indicator {
+.choices-card__control {
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.choices-card__radio {
   display: flex;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
+  width: 1rem;
+  height: 1rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--ui-border, rgb(148 163 184));
-  border-radius: 999px;
-  margin-top: 1px;
-}
-
-.choices-card__input[type='checkbox'] + .choices-card__indicator {
-  border-radius: 5px;
-}
-
-.choices-card--selected .choices-card__indicator {
-  border-color: var(--ui-accent, rgb(37 99 235));
-  background: var(--ui-accent, rgb(37 99 235));
-}
-
-.choices-card__indicator-dot {
-  display: none;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
+  border: 1px solid rgb(156 163 175 / 0.75);
+  border-radius: 9999px;
   background: white;
+  box-shadow: var(--shadow-ui-xs);
 }
 
-.choices-card--selected .choices-card__indicator-dot {
+.dark .choices-card__radio {
+  border: none;
+  background: var(--color-gray-500);
+}
+
+.choices-card-shell--selected .choices-card__radio {
+  border-color: var(--theme-color-ui-accent-bg);
+}
+
+.dark .choices-card-shell--selected .choices-card__radio {
+  border: none;
+  background: var(--color-gray-300);
+}
+
+.choices-card__radio-dot {
   display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--theme-color-ui-accent-bg);
+}
+
+.dark .choices-card__radio-dot {
+  background: var(--theme-color-ui-accent-bg);
+}
+
+.choices-card__checkbox {
+  display: flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(156 163 175 / 0.75);
+  border-radius: 0.125rem;
+  background: white;
+  color: white;
+  box-shadow: var(--shadow-ui-xs);
+}
+
+.dark .choices-card__checkbox {
+  border: none;
+  background: var(--color-gray-500);
+}
+
+.choices-card-shell--selected .choices-card__checkbox {
+  border-color: var(--theme-color-ui-accent-bg);
+  background: var(--theme-color-ui-accent-bg);
+}
+
+.choices-card__checkmark {
+  width: 0.625rem;
+  height: 0.625rem;
+  flex-shrink: 0;
 }
 
 .choices-card__image {
@@ -269,8 +375,7 @@ export default {
   height: 72px;
   flex: 0 0 72px;
   align-self: flex-start;
-  border-radius: 6px;
-  background: var(--ui-bg-subtle, rgb(248 250 252));
+  border-radius: 8px;
   object-fit: cover;
 }
 
@@ -283,21 +388,25 @@ export default {
 }
 
 .choices-card__label {
-  color: var(--ui-text, rgb(15 23 42));
+  color: var(--color-gray-925);
   font-weight: 600;
   line-height: 1.3;
 }
 
-.choices-card__description {
-  color: var(--ui-text-muted, rgb(71 85 105));
+.dark .choices-card__label {
+  color: var(--color-gray-200);
+}
+
+.choices-card__description,
+.choices-card__html {
+  color: var(--color-gray-600);
   font-size: 13px;
   line-height: 1.45;
 }
 
-.choices-card__html {
-  color: var(--ui-text-muted, rgb(71 85 105));
-  font-size: 13px;
-  line-height: 1.45;
+.dark .choices-card__description,
+.dark .choices-card__html {
+  color: var(--color-gray-300);
 }
 
 .choices-card__html :deep(*) {
