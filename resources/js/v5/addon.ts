@@ -1,8 +1,5 @@
 // Statamic Choices — Statamic v5 entry point (Vue 2 / Options API).
 
-declare const Fieldtype: any
-declare const Statamic: any
-
 type ChoiceOption = {
   value: string
   label: string
