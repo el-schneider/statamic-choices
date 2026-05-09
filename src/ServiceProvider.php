@@ -16,12 +16,16 @@ final class ServiceProvider extends AddonServiceProvider
 
     protected function bootVite(): static
     {
+        $input = [$this->supportsInertia()
+            ? 'resources/js/v6/addon.ts'
+            : 'resources/js/v5/addon.ts'];
+
+        if (! $this->supportsInertia()) {
+            $input[] = 'resources/js/v5/addon.css';
+        }
+
         $this->registerVite([
-            'input' => [
-                $this->supportsInertia()
-                    ? 'resources/js/v6/addon.ts'
-                    : 'resources/js/v5/addon.ts',
-            ],
+            'input' => $input,
             'publicDirectory' => 'resources/dist',
         ]);
 
