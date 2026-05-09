@@ -288,9 +288,8 @@ export default {
 }
 
 .choices-card-shell--selected .choices-card {
-  box-shadow:
-    0 0 0 2px var(--theme-color-ui-accent-bg),
-    var(--shadow-ui-md);
+  outline: 2px solid var(--theme-color-ui-accent-bg);
+  outline-offset: 2px;
 }
 
 .choices-card__radio,
