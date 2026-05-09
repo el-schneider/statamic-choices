@@ -208,7 +208,7 @@ class Choices extends Fieldtype
                     'use_html' => $useHtml,
                     'image' => $useHtml ? null : $this->normalizeImageValue($option['image'] ?? null),
                     'description' => ! $useHtml && filled($option['description'] ?? null) ? (string) $option['description'] : null,
-                    'html' => $useHtml && filled($option['html'] ?? null) ? (string) $option['html'] : null,
+                    'html' => $useHtml ? $this->normalizeHtmlValue($option['html'] ?? null) : null,
                 ];
             })
             ->unique('value')
@@ -300,6 +300,15 @@ class Choices extends Fieldtype
     {
         if (is_array($value)) {
             $value = $value[0] ?? null;
+        }
+
+        return filled($value) ? (string) $value : null;
+    }
+
+    private function normalizeHtmlValue($value): ?string
+    {
+        if (is_array($value)) {
+            $value = $value['code'] ?? null;
         }
 
         return filled($value) ? (string) $value : null;
