@@ -106,7 +106,7 @@ class Choices extends Fieldtype
                                     'display' => __('Use Custom HTML'),
                                     'type' => 'toggle',
                                     'default' => false,
-                                    'instructions' => __('Replace the image and description with trusted custom HTML.'),
+                                    'instructions' => __('Content variant only. Replace the image and description with trusted custom HTML.'),
                                 ],
                             ],
                             [
@@ -116,7 +116,7 @@ class Choices extends Fieldtype
                                     'type' => 'assets',
                                     'max_files' => 1,
                                     'mode' => 'grid',
-                                    'instructions' => __('Optional asset displayed at the top of the card.'),
+                                    'instructions' => __('Optional asset displayed in content cards or as the full image card.'),
                                     'unless' => [
                                         'use_html' => true,
                                     ],
@@ -127,7 +127,7 @@ class Choices extends Fieldtype
                                 'field' => [
                                     'display' => __('Description'),
                                     'type' => 'textarea',
-                                    'instructions' => __('Optional supporting text.'),
+                                    'instructions' => __('Content variant only. Optional supporting text.'),
                                     'unless' => [
                                         'use_html' => true,
                                     ],
@@ -141,7 +141,7 @@ class Choices extends Fieldtype
                                     'mode' => 'htmlmixed',
                                     'mode_selectable' => false,
                                     'show_mode_label' => false,
-                                    'instructions' => __('Trusted HTML rendered raw. Replaces the image and description; the label and selection indicator stay controlled by the fieldtype.'),
+                                    'instructions' => __('Content variant only. Trusted HTML rendered raw. Replaces the image and description; the label and selection indicator stay controlled by the fieldtype.'),
                                     'if' => [
                                         'use_html' => true,
                                     ],
@@ -164,6 +164,17 @@ class Choices extends Fieldtype
                         ],
                         'validate' => ['required', 'in:single,multiple'],
                     ],
+                    'variant' => [
+                        'display' => __('Variant'),
+                        'instructions' => __('Content cards show text and optional custom HTML. Image cards show a full-bleed image with the label available as a tooltip and accessible name.'),
+                        'type' => 'button_group',
+                        'default' => 'content',
+                        'options' => [
+                            'content' => __('Content'),
+                            'image' => __('Image'),
+                        ],
+                        'validate' => ['required', 'in:content,image'],
+                    ],
                     'card_width' => [
                         'display' => __('Card Width'),
                         'instructions' => __('Controls how much horizontal space each choice card uses. Cards wrap automatically.'),
@@ -177,6 +188,21 @@ class Choices extends Fieldtype
                             20 => '20%',
                         ],
                         'validate' => ['required', 'in:100,50,33,25,20'],
+                    ],
+                    'image_aspect' => [
+                        'display' => __('Image Aspect'),
+                        'instructions' => __('Image variant only. Controls the shape of full-bleed image cards.'),
+                        'type' => 'button_group',
+                        'default' => '1/1',
+                        'options' => [
+                            '1/1' => '1:1',
+                            '4/3' => '4:3',
+                            '16/9' => '16:9',
+                        ],
+                        'validate' => ['required', 'in:1/1,4/3,16/9'],
+                        'if' => [
+                            'variant' => 'image',
+                        ],
                     ],
                     'default' => [
                         'display' => __('Default Value'),
@@ -193,6 +219,11 @@ class Choices extends Fieldtype
         return $this->config('mode') === 'multiple';
     }
 
+    protected function isImageVariant(): bool
+    {
+        return $this->config('variant') === 'image';
+    }
+
     /**
      * @return array<int, array{value: string, label: string, use_html: bool, image: string|null, description: string|null, html: string|null}>
      */
@@ -204,13 +235,14 @@ class Choices extends Fieldtype
                 $value = (string) $option['value'];
 
                 $useHtml = (bool) ($option['use_html'] ?? false);
+                $useHtmlForContentCard = $useHtml && ! $this->isImageVariant();
 
                 return [
                     'value' => $value,
                     'label' => filled($option['label'] ?? null) ? (string) $option['label'] : $value,
                     'use_html' => $useHtml,
-                    'image' => $useHtml ? null : $this->normalizeImageValue($option['image'] ?? null),
-                    'description' => ! $useHtml && filled($option['description'] ?? null) ? (string) $option['description'] : null,
+                    'image' => $useHtmlForContentCard ? null : $this->normalizeImageValue($option['image'] ?? null),
+                    'description' => ! $useHtmlForContentCard && filled($option['description'] ?? null) ? (string) $option['description'] : null,
                     'html' => $useHtml ? $this->normalizeHtmlValue($option['html'] ?? null) : null,
                 ];
             })

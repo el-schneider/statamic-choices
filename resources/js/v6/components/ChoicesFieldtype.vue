@@ -2,7 +2,7 @@
   <div class="choices-fieldtype">
     <div
       class="choices-grid"
-      :class="cardWidthClass"
+      :class="[cardWidthClass, variantClass]"
       :role="isMultiple ? 'group' : 'radiogroup'"
       :aria-label="config.display || handle"
     >
@@ -14,6 +14,7 @@
           'choices-card-shell--selected': isSelected(option.value),
           'choices-card-shell--disabled': isReadOnly || isDisabled,
         }"
+        :title="isImageVariant ? option.label : undefined"
         @click="handleCardClick(option.value, $event)"
       >
         <input
@@ -23,10 +24,19 @@
           :value="option.value"
           :checked="isSelected(option.value)"
           :disabled="isReadOnly || isDisabled"
+          :aria-label="option.label"
           @change="handleInput(option.value, $event)"
         />
 
-        <Card inset variant="flat" class="choices-card">
+        <Card
+          inset
+          variant="flat"
+          class="choices-card"
+          :class="[
+            isImageVariant ? 'choices-card--image' : 'choices-card--content',
+            isImageVariant ? imageAspectClass : null,
+          ]"
+        >
           <span class="choices-card__control" aria-hidden="true">
             <span v-if="isMultiple" class="choices-card__checkbox">
               <svg
@@ -51,18 +61,31 @@
             </span>
           </span>
 
-          <img
-            v-if="!option.use_html && option.image_url"
-            class="choices-card__image"
-            :src="option.image_url"
-            :alt="option.image_alt || option.label"
-          />
+          <template v-if="isImageVariant">
+            <img
+              v-if="option.image_url"
+              class="choices-card__image-full"
+              :src="option.image_url"
+              alt=""
+              aria-hidden="true"
+            />
+            <span v-else class="choices-card__image-fallback">{{ option.label }}</span>
+          </template>
 
-          <span class="choices-card__body">
-            <span class="choices-card__label">{{ option.label }}</span>
-            <span v-if="option.use_html && option.html" class="choices-card__html" v-html="option.html"></span>
-            <span v-else-if="option.description" class="choices-card__description">{{ option.description }}</span>
-          </span>
+          <template v-else>
+            <img
+              v-if="!option.use_html && option.image_url"
+              class="choices-card__image"
+              :src="option.image_url"
+              :alt="option.image_alt || option.label"
+            />
+
+            <span class="choices-card__body">
+              <span class="choices-card__label">{{ option.label }}</span>
+              <span v-if="option.use_html && option.html" class="choices-card__html" v-html="option.html"></span>
+              <span v-else-if="option.description" class="choices-card__description">{{ option.description }}</span>
+            </span>
+          </template>
         </Card>
       </label>
     </div>
@@ -111,6 +134,10 @@ export default {
       return (this.config as { mode?: string }).mode === 'multiple'
     },
 
+    isImageVariant(): boolean {
+      return (this.config as { variant?: string }).variant === 'image'
+    },
+
     inputType(): string {
       return this.isMultiple ? 'checkbox' : 'radio'
     },
@@ -135,6 +162,19 @@ export default {
       return ['100', '50', '33', '25', '20'].includes(cardWidth)
         ? `choices-grid--card-width-${cardWidth}`
         : 'choices-grid--card-width-100'
+    },
+
+    variantClass(): string {
+      return this.isImageVariant ? 'choices-grid--image-variant' : 'choices-grid--content-variant'
+    },
+
+    imageAspectClass(): string {
+      const aspect = String((this.config as { image_aspect?: string }).image_aspect ?? '1/1')
+
+      if (aspect === '4/3') return 'choices-card--aspect-4-3'
+      if (aspect === '16/9') return 'choices-card--aspect-16-9'
+
+      return 'choices-card--aspect-1-1'
     },
 
     isReadOnly(): boolean {
@@ -277,13 +317,37 @@ export default {
 }
 
 .choices-card {
-  display: flex;
   min-width: 0;
-  gap: 12px;
-  padding: 14px;
   transition:
     box-shadow 120ms ease,
     transform 120ms ease;
+}
+
+.choices-card--content {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+}
+
+.choices-card--image {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.choices-card--aspect-1-1 {
+  aspect-ratio: 1 / 1;
+}
+
+.choices-card--aspect-4-3 {
+  aspect-ratio: 4 / 3;
+}
+
+.choices-card--aspect-16-9 {
+  aspect-ratio: 16 / 9;
 }
 
 .choices-card-shell:hover:not(.choices-card-shell--disabled) .choices-card {
@@ -317,6 +381,14 @@ export default {
 .choices-card__control {
   margin-top: 2px;
   flex: 0 0 auto;
+}
+
+.choices-card--image .choices-card__control {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  margin-top: 0;
 }
 
 .choices-card__radio {
@@ -392,25 +464,41 @@ export default {
   flex: 0 0 72px;
   align-self: flex-start;
   border-radius: 8px;
+  object-fit: contain;
+}
+
+.choices-card__image-full {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
+.choices-card__image-fallback {
+  padding: 16px;
+  color: var(--color-gray-925);
+  font-weight: 600;
+  text-align: center;
+}
+
+.dark .choices-card__image-fallback {
+  color: var(--color-gray-200);
+}
+
 @container (max-width: 220px) {
-  .choices-card {
+  .choices-card--content {
     flex-direction: column;
     gap: 10px;
   }
 
-  .choices-card__control {
+  .choices-card--content .choices-card__control {
     margin-top: 0;
   }
 
-  .choices-card__image {
+  .choices-card--content .choices-card__image {
     width: 100%;
     height: auto;
     max-height: 120px;
     flex-basis: auto;
-    object-fit: contain;
   }
 }
 
