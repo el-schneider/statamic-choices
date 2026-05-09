@@ -99,24 +99,24 @@ const ChoicesFieldtype = {
       const cardWidth = String(self.config?.card_width ?? 100)
 
       return ['100', '50', '33', '25', '20'].includes(cardWidth)
-        ? `choices-v5-grid--card-width-${cardWidth}`
-        : 'choices-v5-grid--card-width-100'
+        ? `choices-grid--card-width-${cardWidth}`
+        : 'choices-grid--card-width-100'
     },
 
     variantClass(): string {
       const self = this as unknown as ChoicesComponent
 
-      return self.isImageVariant ? 'choices-v5-grid--image-variant' : 'choices-v5-grid--content-variant'
+      return self.isImageVariant ? 'choices-grid--image-variant' : 'choices-grid--content-variant'
     },
 
     imageAspectClass(): string {
       const self = this as unknown as ChoicesComponent
       const aspect = String(self.config?.image_aspect ?? '1/1')
 
-      if (aspect === '4/3') return 'choices-v5-card--aspect-4-3'
-      if (aspect === '16/9') return 'choices-v5-card--aspect-16-9'
+      if (aspect === '4/3') return 'choices-card--aspect-4-3'
+      if (aspect === '16/9') return 'choices-card--aspect-16-9'
 
-      return 'choices-v5-card--aspect-1-1'
+      return 'choices-card--aspect-1-1'
     },
 
     isReadOnly(): boolean {
@@ -228,9 +228,9 @@ const ChoicesFieldtype = {
   },
 
   template: /* html */ `
-        <div class="choices-v5-fieldtype">
+        <div class="choices-fieldtype choices-fieldtype--v5">
             <div
-                class="choices-v5-grid"
+                class="choices-grid"
                 :class="[cardWidthClass, variantClass]"
                 :role="isMultiple ? 'group' : 'radiogroup'"
                 :aria-label="config.display || handle"
@@ -238,17 +238,16 @@ const ChoicesFieldtype = {
                 <label
                     v-for="option in options"
                     :key="option.value"
-                    class="choices-v5-card-shell"
+                    class="choices-card-shell"
                     :class="{
-                        'choices-v5-card-shell--selected': isSelected(option.value),
-                        'choices-v5-card-shell--disabled': isReadOnly || isDisabled,
-                        'choices-v5-card-shell--focused': focusedValue === option.value
+                        'choices-card-shell--selected': isSelected(option.value),
+                        'choices-card-shell--disabled': isReadOnly || isDisabled
                     }"
                     :title="isImageVariant ? option.label : null"
                     @click="handleCardClick(option.value, $event)"
                 >
                     <input
-                        class="choices-v5-card__input"
+                        class="choices-card__input"
                         :type="inputType"
                         :name="inputName"
                         :value="option.value"
@@ -256,25 +255,23 @@ const ChoicesFieldtype = {
                         :disabled="isReadOnly || isDisabled"
                         :aria-label="option.label"
                         @change="handleInput(option.value, $event)"
-                        @focus="focusedValue = option.value"
-                        @blur="focusedValue = null"
                     />
 
                     <span
-                        class="choices-v5-card"
+                        class="choices-card"
                         :class="[
-                            isImageVariant ? 'choices-v5-card--image' : 'choices-v5-card--content',
+                            isImageVariant ? 'choices-card--image' : 'choices-card--content',
                             isImageVariant ? imageAspectClass : null
                         ]"
                     >
-                        <span class="choices-v5-card__control" aria-hidden="true">
-                            <span v-if="isMultiple" class="choices-v5-card__checkbox">
+                        <span class="choices-card__control" aria-hidden="true">
+                            <span v-if="isMultiple" class="choices-card__checkbox">
                                 <svg
                                     v-if="isSelected(option.value)"
                                     viewBox="0 0 10 8"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
-                                    class="choices-v5-card__checkmark"
+                                    class="choices-card__checkmark"
                                     aria-hidden="true"
                                 >
                                     <path
@@ -286,34 +283,34 @@ const ChoicesFieldtype = {
                                     />
                                 </svg>
                             </span>
-                            <span v-else class="choices-v5-card__radio">
-                                <span v-if="isSelected(option.value)" class="choices-v5-card__radio-dot"></span>
+                            <span v-else class="choices-card__radio">
+                                <span v-if="isSelected(option.value)" class="choices-card__radio-dot"></span>
                             </span>
                         </span>
 
                         <template v-if="isImageVariant">
                             <img
                                 v-if="option.image_url"
-                                class="choices-v5-card__image-full"
+                                class="choices-card__image-full"
                                 :src="option.image_url"
                                 alt=""
                                 aria-hidden="true"
                             />
-                            <span v-else class="choices-v5-card__image-fallback">{{ option.label }}</span>
+                            <span v-else class="choices-card__image-fallback">{{ option.label }}</span>
                         </template>
 
                         <template v-else>
                             <img
                                 v-if="!option.use_html && option.image_url"
-                                class="choices-v5-card__image"
+                                class="choices-card__image"
                                 :src="option.image_url"
                                 :alt="option.image_alt || option.label"
                             />
 
-                            <span class="choices-v5-card__body">
-                                <span class="choices-v5-card__label">{{ option.label }}</span>
-                                <span v-if="option.use_html && option.html" class="choices-v5-card__html" v-html="option.html"></span>
-                                <span v-else-if="option.description" class="choices-v5-card__description">{{ option.description }}</span>
+                            <span class="choices-card__body">
+                                <span class="choices-card__label">{{ option.label }}</span>
+                                <span v-if="option.use_html && option.html" class="choices-card__html" v-html="option.html"></span>
+                                <span v-else-if="option.description" class="choices-card__description">{{ option.description }}</span>
                             </span>
                         </template>
                     </span>
@@ -321,12 +318,6 @@ const ChoicesFieldtype = {
             </div>
         </div>
     `,
-
-  data() {
-    return {
-      focusedValue: null,
-    }
-  },
 }
 
 Statamic.booting?.(() => {
