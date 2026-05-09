@@ -265,6 +265,7 @@ export default {
 
 .choices-card-shell {
   position: relative;
+  container-type: inline-size;
   display: block;
   min-width: 0;
   cursor: pointer;
@@ -392,6 +393,25 @@ export default {
   align-self: flex-start;
   border-radius: 8px;
   object-fit: cover;
+}
+
+@container (max-width: 220px) {
+  .choices-card {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choices-card__control {
+    margin-top: 0;
+  }
+
+  .choices-card__image {
+    width: 100%;
+    height: auto;
+    max-height: 120px;
+    flex-basis: auto;
+    object-fit: contain;
+  }
 }
 
 .choices-card__body {
