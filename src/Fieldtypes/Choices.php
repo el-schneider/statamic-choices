@@ -139,6 +139,8 @@ class Choices extends Fieldtype
                                     'display' => __('Custom HTML'),
                                     'type' => 'code',
                                     'mode' => 'htmlmixed',
+                                    'mode_selectable' => false,
+                                    'show_mode_label' => false,
                                     'instructions' => __('Trusted HTML rendered raw. Replaces the image and description; the label and selection indicator stay controlled by the fieldtype.'),
                                     'if' => [
                                         'use_html' => true,
