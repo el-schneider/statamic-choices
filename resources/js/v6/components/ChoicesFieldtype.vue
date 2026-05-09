@@ -15,7 +15,11 @@
           'choices-card-shell--disabled': isReadOnly || isDisabled,
         }"
         :title="isImageVariant ? option.label : undefined"
+        :role="isMultiple ? undefined : 'radio'"
+        :aria-checked="isMultiple ? undefined : isSelected(option.value)"
+        :tabindex="isMultiple ? undefined : 0"
         @click="handleCardClick(option.value, $event)"
+        @keydown="handleCardKeydown(option.value, $event)"
       >
         <input
           class="choices-card__input"
@@ -25,6 +29,7 @@
           :checked="isSelected(option.value)"
           :disabled="isReadOnly || isDisabled"
           :aria-label="option.label"
+          :tabindex="isMultiple ? undefined : -1"
           @change="handleInput(option.value, $event)"
         />
 
@@ -242,6 +247,42 @@ export default {
       this.setMultipleSelection(value, !this.isSelected(value))
     },
 
+    handleCardKeydown(value: string, event: KeyboardEvent): void {
+      if (this.isReadOnly || this.isDisabled || this.isMultiple) return
+
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault()
+        this.$emit('update:value', value)
+        return
+      }
+
+      const offset = {
+        ArrowRight: 1,
+        ArrowDown: 1,
+        ArrowLeft: -1,
+        ArrowUp: -1,
+      }[event.key]
+
+      if (offset === undefined) return
+
+      event.preventDefault()
+
+      const currentIndex = this.options.findIndex((option) => option.value === value)
+      const nextIndex = (currentIndex + offset + this.options.length) % this.options.length
+      const nextValue = this.options[nextIndex]?.value
+
+      if (!nextValue) return
+
+      this.$emit('update:value', nextValue)
+      this.focusRadioCard(nextIndex)
+    },
+
+    focusRadioCard(index: number): void {
+      this.$nextTick(() => {
+        ;(this.$el as HTMLElement).querySelectorAll<HTMLElement>('.choices-card-shell[role="radio"]')[index]?.focus()
+      })
+    },
+
     setMultipleSelection(value: string, selected: boolean): void {
       if (this.isReadOnly || this.isDisabled) return
 
@@ -282,8 +323,8 @@ export default {
   transform: translateY(-1px);
 }
 
-.choices-card-shell:has(:focus-visible) .choices-card,
-.choices-card-shell--selected .choices-card {
+.choices-card-shell:focus-visible .choices-card,
+.choices-card-shell:has(:focus-visible) .choices-card {
   outline-width: var(--focus-outline-width);
   outline-offset: var(--focus-outline-offset);
   outline-color: var(--focus-outline-color, currentColor);

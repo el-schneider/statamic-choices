@@ -58,6 +58,20 @@ describe('ChoicesFieldtype v6', () => {
     expect(wrapper.emitted('update:value')).toEqual([['pro']])
   })
 
+  it('makes radio cards keyboard focusable and selectable', async () => {
+    const wrapper = mountChoices({ value: 'basic' })
+    const cards = wrapper.findAll('.choices-card-shell')
+
+    expect(cards[0].attributes('role')).toBe('radio')
+    expect(cards[0].attributes('tabindex')).toBe('0')
+    expect(wrapper.find('input').attributes('tabindex')).toBe('-1')
+
+    await cards[1].trigger('keydown', { key: 'Enter' })
+    await cards[1].trigger('keydown', { key: 'ArrowRight' })
+
+    expect(wrapper.emitted('update:value')).toEqual([['pro'], ['enterprise']])
+  })
+
   it('toggles multiple selections in configured option order', async () => {
     const wrapper = mountChoices({
       value: ['enterprise'],
@@ -113,6 +127,7 @@ describe('ChoicesFieldtype v6', () => {
     expect(wrapper.find('.choices-card--image').exists()).toBe(true)
     expect(wrapper.find('.choices-card--aspect-16-9').exists()).toBe(true)
     expect(wrapper.find('.choices-card-shell').attributes('title')).toBe('Pro')
+    expect(wrapper.find('.choices-card-shell').attributes('aria-checked')).toBe('false')
     expect(wrapper.find('input').attributes('aria-label')).toBe('Pro')
     expect(wrapper.find('.choices-card__image-full').attributes('src')).toBe('/pro.svg')
   })
