@@ -2,6 +2,17 @@
 
 All notable changes to `statamic-choices` will be documented in this file.
 
+## v0.1.1 - 2026-05-09
+
+### What's fixed
+
+- **Publish control panel assets after Composer install** — Fresh installs now automatically publish the packaged Vite build to `public/vendor/statamic-choices/build`, preventing `Vite manifest not found` errors in the Control Panel.
+
+### Verification
+
+- Verified automatic asset publishing during `composer require` in Statamic v5 and v6 sandboxes.
+- CI passes for the release commit.
+
 ## v0.1.0 - 2026-05-09
 
 ### What's new
