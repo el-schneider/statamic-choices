@@ -52,7 +52,7 @@
           </span>
 
           <img
-            v-if="option.image_url"
+            v-if="!option.use_html && option.image_url"
             class="choices-card__image"
             :src="option.image_url"
             :alt="option.image_alt || option.label"
@@ -60,8 +60,8 @@
 
           <span class="choices-card__body">
             <span class="choices-card__label">{{ option.label }}</span>
-            <span v-if="option.description" class="choices-card__description">{{ option.description }}</span>
-            <span v-if="option.html" class="choices-card__html" v-html="option.html"></span>
+            <span v-if="option.use_html && option.html" class="choices-card__html" v-html="option.html"></span>
+            <span v-else-if="option.description" class="choices-card__description">{{ option.description }}</span>
           </span>
         </Card>
       </label>
@@ -75,6 +75,7 @@ import { Card } from '@statamic/cms/ui'
 type ChoiceOption = {
   value: string
   label: string
+  use_html?: boolean
   image?: string | null
   image_url?: string | null
   image_alt?: string | null

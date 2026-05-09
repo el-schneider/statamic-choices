@@ -90,7 +90,6 @@ class Choices extends Fieldtype
                                     'display' => __('Value'),
                                     'type' => 'text',
                                     'validate' => ['required'],
-                                    'width' => 50,
                                 ],
                             ],
                             [
@@ -99,7 +98,15 @@ class Choices extends Fieldtype
                                     'display' => __('Label'),
                                     'type' => 'text',
                                     'validate' => ['required'],
-                                    'width' => 50,
+                                ],
+                            ],
+                            [
+                                'handle' => 'use_html',
+                                'field' => [
+                                    'display' => __('Use Custom HTML'),
+                                    'type' => 'toggle',
+                                    'default' => false,
+                                    'instructions' => __('Replace the image and description with trusted custom HTML.'),
                                 ],
                             ],
                             [
@@ -110,6 +117,9 @@ class Choices extends Fieldtype
                                     'max_files' => 1,
                                     'mode' => 'grid',
                                     'instructions' => __('Optional asset displayed at the top of the card.'),
+                                    'unless' => [
+                                        'use_html' => true,
+                                    ],
                                 ],
                             ],
                             [
@@ -118,15 +128,21 @@ class Choices extends Fieldtype
                                     'display' => __('Description'),
                                     'type' => 'textarea',
                                     'instructions' => __('Optional supporting text.'),
+                                    'unless' => [
+                                        'use_html' => true,
+                                    ],
                                 ],
                             ],
                             [
                                 'handle' => 'html',
                                 'field' => [
-                                    'display' => __('HTML'),
+                                    'display' => __('Custom HTML'),
                                     'type' => 'code',
                                     'mode' => 'htmlmixed',
-                                    'instructions' => __('Advanced: trusted HTML rendered raw inside the card.'),
+                                    'instructions' => __('Trusted HTML rendered raw. Replaces the image and description; the label and selection indicator stay controlled by the fieldtype.'),
+                                    'if' => [
+                                        'use_html' => true,
+                                    ],
                                 ],
                             ],
                         ],
@@ -145,7 +161,6 @@ class Choices extends Fieldtype
                             'multiple' => __('Multiple choices'),
                         ],
                         'validate' => ['required', 'in:single,multiple'],
-                        'width' => 50,
                     ],
                     'layout' => [
                         'display' => __('Layout'),
@@ -156,7 +171,6 @@ class Choices extends Fieldtype
                             'two_columns' => __('Two columns'),
                         ],
                         'validate' => ['required', 'in:one_column,two_columns'],
-                        'width' => 50,
                     ],
                     'default' => [
                         'display' => __('Default Value'),
@@ -174,7 +188,7 @@ class Choices extends Fieldtype
     }
 
     /**
-     * @return array<int, array{value: string, label: string, image: string|null, description: string|null, html: string|null}>
+     * @return array<int, array{value: string, label: string, use_html: bool, image: string|null, description: string|null, html: string|null}>
      */
     private function normalizedOptions(): array
     {
@@ -183,12 +197,15 @@ class Choices extends Fieldtype
             ->map(function (array $option) {
                 $value = (string) $option['value'];
 
+                $useHtml = (bool) ($option['use_html'] ?? false);
+
                 return [
                     'value' => $value,
                     'label' => filled($option['label'] ?? null) ? (string) $option['label'] : $value,
-                    'image' => $this->normalizeImageValue($option['image'] ?? null),
-                    'description' => filled($option['description'] ?? null) ? (string) $option['description'] : null,
-                    'html' => filled($option['html'] ?? null) ? (string) $option['html'] : null,
+                    'use_html' => $useHtml,
+                    'image' => $useHtml ? null : $this->normalizeImageValue($option['image'] ?? null),
+                    'description' => ! $useHtml && filled($option['description'] ?? null) ? (string) $option['description'] : null,
+                    'html' => $useHtml && filled($option['html'] ?? null) ? (string) $option['html'] : null,
                 ];
             })
             ->unique('value')
