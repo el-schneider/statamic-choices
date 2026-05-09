@@ -172,8 +172,9 @@ class Choices extends Fieldtype
                             50 => '50%',
                             33 => '33%',
                             25 => '25%',
+                            20 => '20%',
                         ],
-                        'validate' => ['required', 'in:100,50,33,25'],
+                        'validate' => ['required', 'in:100,50,33,25,20'],
                     ],
                     'default' => [
                         'display' => __('Default Value'),

@@ -132,7 +132,7 @@ export default {
     cardWidthClass(): string {
       const cardWidth = String((this.config as { card_width?: string | number }).card_width ?? 100)
 
-      return ['100', '50', '33', '25'].includes(cardWidth)
+      return ['100', '50', '33', '25', '20'].includes(cardWidth)
         ? `choices-grid--card-width-${cardWidth}`
         : 'choices-grid--card-width-100'
     },
@@ -240,7 +240,8 @@ export default {
 .choices-grid--card-width-100,
 .choices-grid--card-width-50,
 .choices-grid--card-width-33,
-.choices-grid--card-width-25 {
+.choices-grid--card-width-25,
+.choices-grid--card-width-20 {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -255,6 +256,10 @@ export default {
 
   .choices-grid--card-width-25 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .choices-grid--card-width-20 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
