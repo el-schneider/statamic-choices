@@ -282,14 +282,12 @@ export default {
   transform: translateY(-1px);
 }
 
-.choices-card-shell:has(:focus-visible) .choices-card {
-  outline: 2px solid var(--theme-color-ui-accent-bg);
-  outline-offset: 2px;
-}
-
+.choices-card-shell:has(:focus-visible) .choices-card,
 .choices-card-shell--selected .choices-card {
-  outline: 2px solid var(--theme-color-ui-accent-bg);
-  outline-offset: 2px;
+  outline-width: var(--focus-outline-width);
+  outline-offset: var(--focus-outline-offset);
+  outline-color: var(--focus-outline-color, currentColor);
+  outline-style: var(--focus-outline-style, solid);
 }
 
 .choices-card__radio,
