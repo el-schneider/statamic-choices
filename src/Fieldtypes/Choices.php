@@ -235,15 +235,16 @@ class Choices extends Fieldtype
                 $value = (string) $option['value'];
 
                 $useHtml = (bool) ($option['use_html'] ?? false);
-                $useHtmlForContentCard = $useHtml && ! $this->isImageVariant();
+                $isImageVariant = $this->isImageVariant();
+                $useHtmlForContentCard = $useHtml && ! $isImageVariant;
 
                 return [
                     'value' => $value,
                     'label' => filled($option['label'] ?? null) ? (string) $option['label'] : $value,
                     'use_html' => $useHtml,
                     'image' => $useHtmlForContentCard ? null : $this->normalizeImageValue($option['image'] ?? null),
-                    'description' => ! $useHtmlForContentCard && filled($option['description'] ?? null) ? (string) $option['description'] : null,
-                    'html' => $useHtml ? $this->normalizeHtmlValue($option['html'] ?? null) : null,
+                    'description' => ! $useHtmlForContentCard && ! $isImageVariant && filled($option['description'] ?? null) ? (string) $option['description'] : null,
+                    'html' => $useHtmlForContentCard ? $this->normalizeHtmlValue($option['html'] ?? null) : null,
                 ];
             })
             ->unique('value')
