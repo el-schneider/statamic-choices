@@ -1,5 +1,5 @@
 /vendor
 /node_modules
-/resources/dist
+/resources/dist/hot
 /composer.lock
 .DS_Store

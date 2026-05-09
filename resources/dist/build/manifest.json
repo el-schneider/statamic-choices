@@ -1,0 +1,22 @@
+{
+  "resources/js/v5/addon.css": {
+    "file": "assets/addon-DhKoic9G.css",
+    "src": "resources/js/v5/addon.css",
+    "isEntry": true
+  },
+  "resources/js/v5/addon.ts": {
+    "file": "assets/addon-D4WH1sZI.js",
+    "name": "addon",
+    "src": "resources/js/v5/addon.ts",
+    "isEntry": true
+  },
+  "resources/js/v6/addon.ts": {
+    "file": "assets/addon-CqR5XNde.js",
+    "name": "addon",
+    "src": "resources/js/v6/addon.ts",
+    "isEntry": true,
+    "css": [
+      "assets/addon-DJNPAljg.css"
+    ]
+  }
+}
