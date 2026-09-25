@@ -10,22 +10,9 @@ Package: `el-schneider/statamic-choices`
 
 > ⚠️ **Pre-v1, active development.** Backwards compatibility is generally **not** a reason to hold back changes — breaking changes are acceptable and expected. **Remove this notice from AGENTS.md as soon as v1 is released.**
 
-## Sandbox Environments
+## Local Environment
 
-```
-../statamic-choices/              # addon
-../statamic-choices-test/         # Statamic v5 sandbox
-../statamic-choices-test-v6/      # Statamic v6 sandbox
-```
-
-### Sandbox URLs
-
-| Version | URL                                    |
-| ------- | -------------------------------------- |
-| v5      | `http://statamic-choices-test.test`    |
-| v6      | `http://statamic-choices-test-v6.test` |
-
-**Credentials:** `agent@agent.md` / `agent`
+Sandboxes, URLs, ports, and credentials are machine-specific and live in an untracked `AGENTS.local.md` (in this directory or a parent). Read it before running the addon in a Statamic app.
 
 ## Development Commands
 
